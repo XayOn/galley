@@ -1,0 +1,176 @@
+openapi: "3.0.0"
+info:
+  description: "Peer-review OCR documents."
+  version: "1.0.0"
+  title: "Galley"
+paths:
+  /book/:
+    post:
+      summary: Create a book.
+               Upload a zipfile with pages in the format "page_1.png"
+               "page_1.txt", a book_id will be returned and it
+               will be added to the main book list.
+      responses:
+        '200':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  book_id:
+                   type: string
+                  book_pages:
+                   type: array
+                   items:
+                     type: integer
+                   example: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        "405":
+          description: "Invalid input"
+  /book/{book_id}/{page}:
+    get:
+      parameters:
+      - name: "book_id"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      - name: "page"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      description: "Return page"
+      summary: Return page
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                   type: string
+                   example: Complete page as text
+                  image:
+                   type: string
+                   example: "base64 image"
+                  revisions:
+                   type: array
+                   items:
+                     type: integer
+                   example: [1, 2, 3]
+        "405":
+          description: "Invalid input"
+    post:
+      parameters:
+      - name: "book_id"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      - name: "page"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: Text
+                user_id:
+                  type: string
+                  description: User fingerprint. Ip address will be added to it
+      summary: "Create a page revision"
+      description: ""
+      operationId: "reviewPage"
+      responses:
+        "405":
+          description: "Invalid input"
+  /book/{book_id}/{page}/{revision}:
+    get:
+      parameters:
+      - name: "book_id"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      - name: "page"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      - name: "revision"
+        in: "path"
+        schema:
+          type: string
+          description: "Revision Id"
+        required: true
+      description: "Return page"
+      summary: Return page revision text
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                   type: string
+                   example: Complete page revision as text
+                  user_id:
+                    type: string
+                    example: User Id
+        "405":
+          description: "Invalid input"
+    put:
+      parameters:
+      - name: "book_id"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      - name: "page"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      - name: "revision"
+        in: "path"
+        schema:
+          type: string
+          description: "Revision Id"
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approved:
+                  type: boolean
+                  description: Approval
+                user_id:
+                  type: string
+                  description: Unique user fingerprint
+      summary: "Vote page revision"
+      description: ""
+      operationId: "votePage"
+      responses:
+        "405":
+          description: "Invalid input"
