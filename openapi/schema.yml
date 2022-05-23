@@ -4,6 +4,19 @@ info:
   version: "1.0.0"
   title: "Galley"
 paths:
+  /book/{book_id}:
+    get:
+      summary: Return a book, or all of them
+      parameters:
+      - name: "book_id"
+        in: "path"
+        schema:
+          type: string
+          description: "Page number"
+        required: true
+      responses:
+        '200':
+          description: Book
   /book/:
     post:
       summary: Create a book.

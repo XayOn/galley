@@ -8,7 +8,8 @@ class Book(Model):
     """Book."""
 
     id = fields.IntField(pk=True)
-    pages: fields.ReverseRelation["Page"]
+    creator = fields.TextField()
+    pages : fields.ReverseRelation["Page"]
 
 
 class Page(Model):
@@ -20,7 +21,7 @@ class Page(Model):
         "models.Book", related_name="pages")
     text = fields.TextField()
     image = fields.TextField()
-    revisions: fields.ReverseRelation["PageRevision"]
+    revisions : fields.ReverseRelation["PageRevision"]
 
 
 class PageRevision(Model):
@@ -31,11 +32,12 @@ class PageRevision(Model):
         "models.Page", related_name="revisions")
     owner = fields.TextField()
     text = fields.TextField()
-    votes: fields.ReverseRelation["Vote"]
+    votes : fields.ReverseRelation["Vote"]
 
-    async def score(self):
+    async def score(self) -> int:
         """Return total score on votes."""
-        return sum([a.result async for a in self.votes])
+        await self.fetch_related("votes")
+        return sum([a.result for a in self.votes])
 
 
 class Vote(Model):
@@ -43,6 +45,6 @@ class Vote(Model):
 
     id = fields.IntField(pk=True)
     revision: fields.ForeignKeyRelation[PageRevision] = fields.ForeignKeyField(
-        "models.Page", related_name="votes")
+        "models.PageRevision", related_name="votes")
     user = fields.TextField()
     result = fields.IntField()

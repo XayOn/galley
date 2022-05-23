@@ -6,11 +6,11 @@ import sys
 from cleo import Application, Command
 
 import aiohttp
+import aiohttp.web
 from aiohttp_swagger3 import SwaggerFile, SwaggerUiSettings
-from loguru import logger
 from tortoise import Tortoise
 
-from .views import BookPage, BookRevision, create_book
+from .views import BookPage, BookRevision, BookView
 
 
 async def setup(app):
@@ -33,7 +33,7 @@ class ServerCommand(Command):
         {--prefix= : API prefix to expose}
     """
 
-    project_dir = Path('.').absolute()
+    project_dir = Path(__file__).parent.parent.absolute()
     project_name = os.getenv('project_name', sys.argv[0].split('/')[-1])
 
     def handle(self):
@@ -49,7 +49,8 @@ class ServerCommand(Command):
             app,
             spec_file=spec,
             swagger_ui_settings=SwaggerUiSettings(path="/docs/"))
-        app['router'].add_post('/book/', create_book)
+        app['router'].add_view('/book/{book_id}', BookView)
+        app['router'].add_view('/book/', BookView)
         app['router'].add_view('/book/{book_id}/{page}', BookPage)
         app['router'].add_view('/book/{book_id}/{page}/{revision}',
                                BookRevision)
